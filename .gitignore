@@ -1,0 +1,12 @@
+__pycache__
+*.pyc
+!.gitignore
+!./notebooks/check_log.ipynb
+!./step_1_2_rl_adv/statics/nam_c_track.pkl
+*.png
+*.zip
+*.pt
+experiments
+logs
+*.pkl
+outputs

@@ -1,0 +1,42 @@
+0327.
+1. Input observation space에 curvature 정보 추가하기
+
+2. Input observation space를 이미지의 형태로 변환하기
+	- 차량의 조향각 정보를 바탕으로 lidar, forward vector들 올바르게 회전 시키기
+	- 64x64 크기의 이미지를 입력으로 사용하도록 (해상도가 떨어진다 싶으면 128x128로 늘리기)
+	- 1st channel: Lidar Sensor(화살표로 처리)
+	- 2nd channel: Forward Vector (화살표로 처리)
+	- 3rd channel: 트랙의 중앙선 
+
+3. Hydra Config 연계해서 학습 main 코드 수정하기
+	- Observation Configuration
+	- RL Algorithm Configuration
+		- RL Model Parameters
+		- RL Optimizer Parameters
+	- Environment Configuration (이건 뭐 아무래도 트랙 생성 관련해서, 그리고 reward function과 관련해서 사용할듯)
+	
+
+	- 특히 optimizer, scheduler, action noise scheduling, gamma, entropy coefficient 등 조절할 때 필요 
+		- SAC, PPO모두 distributional policy에서 action을 sampling하기 때문에 이미 stochastic하지만, distribution의 variance를 늘려주기 위해서 entropy maximization term을 추가하거나 action noise를 쓰기도 함.
+		- Discrete action space의 경우에는 exploration / exploitation을 조절하는 파라미터를 따로 썼던 것 같음.
+
+
+4. PPO + Beta Distribution 다시 점검 필요 (혹은 정말 Beta distribution이 의미가 없을지도?)
+
+5. Visdom / Wandb / TensorBoard 중 하나 연결해서 결과 로깅 되도록 하기
+	- 매번 simulation 화면을 보고 있는게 쉽지도 않고, 계속 보고 있지도 않음. 그래서 결과 reward들이나 parameter 값들이 계속 바뀌게 한다면 이를 트래킹할 방법이 필요함.
+
+6. Reward Function 재설계
+	- Higher reward when using strong side force
+	-> e_c * w_ec + -1 * e_theta * w_etheta  ===> 이 objective를 maximize하는 것이 목적
+		- e_c: 목표로 하는 다음 time step의 중앙선에서의 reference location과의 수직 거리
+		- e_theta: 목표로 하는 다음 time step의 중앙선까지의 곡선 거리 (theta_ref - theta_car이기 때문에 음수이면 차가 더 멀리 간거라고 볼 수 있음)
+		-> 우선은 하나의 time step에 대해서만 고려해서 reward를 계산하는 게 좋을 것 같음.
+
+7. Actor Network 재설계
+	- Recurrent(=Autoregressive) Actor -> LSTM/RNN based actor
+		- 꼭 모델을 학습시키지 않아도 현재 environment의 state를 복제해서 rollout을 진행하면 어떨지??? 
+
+
+8. 양발 운전 없애기 (Brake/Gas를 따로 처리하지 않도록)
+

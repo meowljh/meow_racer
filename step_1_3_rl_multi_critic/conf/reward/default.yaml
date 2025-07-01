@@ -1,0 +1,110 @@
+curvature_weighted_vel_reward:
+  usage: !!bool false
+  kappa_weight_value: !!float 1.
+  reward_weight: !!float 1.
+  normalize_vel: !!bool true
+  
+progress_reward:
+  usage: !!bool false
+  reward_value: !!float 1.
+
+curvature_vel_reward:
+  usage: !!bool false
+  reward_value: !!float 1.
+  target_theta: !!float 20.
+  future_mode: !!str mean
+  continuous: !!bool true
+  
+E_phi_reward:
+  usage: !!bool false
+  reward_value: !!float 1.
+
+movement_reward:
+  usage: !!bool false
+  reward_value: !!float 1.
+  reward_min_vel: !!float 8.
+  reward_max_vel: !!float 25.
+  overspeed_pen_value: !!float 1.
+  underspeed_pen_value: !!float 1.
+
+tile_step_reward:
+  usage: !!bool false
+  max_reward_weight: !!float 3000
+
+neg_velocity_aps_reward:
+  usage: !!bool false
+  reward_weight: !!float 1.
+  
+target_velocity_reward:
+  usage: !!bool false
+  reward_weight: !!float 1.
+  target_vel: !!float 10.
+  gauss_sigma: !!float 1.
+  give_penalty_to_out_dist: !!bool true
+  use_hard_penalty: !!bool false
+  continuous: !!bool true
+
+
+track_align_velocity_reward:
+  usage: !!bool false
+  reward_weight: !!float 1.
+  normalize_vel: !!bool false
+
+center_consist_reward:
+  usage: !!bool false
+  max_reward: !!float 10
+  E_c_thresh: !!float 1e-1
+  grad: !!float -0.1
+
+correct_steering_reward:
+  usage: !!bool false
+  reward_weight: !!float 1.
+  forward_theta_range: !!int 100
+
+alignment_reward:
+  usage: !!bool false
+  reward_weight: !!float 1.
+
+center_line_reward:
+  usage: !!bool false
+  e_phi_weight: !!float 0.
+  e_c_weight: !!float 0.
+
+ 
+
+progress_reward_euclidian:
+  usage: !!bool false
+  reward_weight: !!float 1.
+
+curvature_reward:
+  usage: !!bool false
+  reward_weight: !!float 1.
+  n_points: !!int 15
+  d_theta: !!int 100
+
+progress_reward_curve:
+  usage: !!bool false
+  reward_weight: !!float 1.
+  scale_progress: !!bool false
+
+velocity_reward:
+  usage: !!bool false
+  reward_weight: !!float 1.
+
+distance_based_reward:
+  usage: !!bool false
+  theta_weight: !!float 2000
+
+vel_dist_balanced_reward:
+  usage: !!bool false
+  vel_weight: !!float 1.
+  dist_weight: !!float 10.
+  
+vel_error_balanced_reward:
+  usage: !!bool false
+  vel_weight: !!float 10.
+  c_error_weight: !!float 1.
+  do_scale: !!bool true
+
+attitude_reward:
+  usage: !!bool false

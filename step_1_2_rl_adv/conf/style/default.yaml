@@ -1,0 +1,92 @@
+style_mode:
+  type: !!str none #medium #multi #aggressive #defensive
+  common_weight: !!float 1.
+  aggressive_weight: !!float 1.
+  defensive_weight: !!float 1.
+
+common:
+  progress_reward:
+    usage: !!bool false
+    reward_value: !!float 1.
+  
+  curvature_vel_reward:
+    usage: !!bool false
+    reward_value: !!float 1.
+    target_theta: !!float 20.
+    future_mode: !!str mean
+    continuous: !!bool true
+    fix_possible_error: !!bool false
+    vehicle_speed_vx: !!bool false
+  
+  E_phi_reward:
+    usage: !!bool false
+    reward_value: !!float 1.
+  
+  track_align_velocity_reward:
+    usage: !!bool false
+    reward_weight: !!float 1.
+    normalize_vel: !!bool false
+
+  time_penalty:
+    usage: !!bool false
+    penalty_value: !!float 0.1
+
+  min_velocity_penalty:
+    usage: !!bool false
+    penalty_value: !!float 0.05
+    min_velocity: !!float 0.0
+
+  neg_velocity_bps_penalty:
+    usage: !!bool false
+    penalty_value: !!float 1.
+
+  off_course_penalty:
+    usage: !!bool false
+    penalty_value: !!float 1.
+    condition: !!str off_course_com #center of mass will be the condition of tracking the vehicle off-track
+    ratio_usage: !!bool false
+
+defensive:
+  E_c_penalty:
+    usage: !!bool false
+    penalty_value: !!float 1.
+    normalize_E_c: !!bool true
+    as_reward: !!bool false
+
+  smooth_control_penalty:
+    usage: !!bool false
+    aps_penalty_value: !!float 1.
+    bps_penalty_value: !!float 1.
+    steer_penalty_value: !!float 1.
+
+  curvature_velocity_penalty:
+    usage: !!bool false
+    penalty_weight: !!float 1.
+    norm_vel: !!bool false
+    norm_kappa: !!bool false
+    normed_kappa_clip_value: !!float 1.
+  
+
+aggressive:
+  neg_velocity_aps_reward:
+    usage: !!bool false
+    reward_weight: !!float 1.
+  
+  curvature_weighted_vel_reward:
+    usage: !!bool false
+    kappa_weight_value: !!float 1.
+    reward_weight: !!float 1.
+    normalize_vel: !!bool true
+  
+  straight_line_vel_reward:
+    usage: !!bool false
+    reward_weight: !!float 1.
+    normalize_vel: !!bool false
+    corner_kappa_thresh: !!float 0.01
+
+  hard_corner_curvature_weighted_vel_reward:
+    usage: !!bool false
+    reward_weight: !!float 1.
+    normalize_kappa: !!bool false
+    corner_kappa_thresh: !!float 0.01
+    normalize_vel: !!bool false

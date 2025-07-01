@@ -1,0 +1,44 @@
+#!/bin/bash
+
+python train_main.py --config-name config_mhead \
+    agent.exp_name=local_debug_v4_Nam_Act3_MHead \
+    agent.policy.layer_norm=true \
+    agent.algorithm.warmup_actor_step=-1.\
+    agent.algorithm.batch_size=256 \
+    agent.algorithm.num_epochs=100000 \
+    agent.algorithm.min_num_steps_before_training=1000 \
+    agent.algorithm.num_expl_steps_per_train_loop=5000 \
+    agent.algorithm.num_trains_per_train_loop=5000 \
+    agent.algorithm.max_path_length=1000000 \
+    agent.algorithm.num_train_loops_per_epoch=1 \
+    agent.replay_buffer_size=1000000 \
+    agent.test.test_log_path="D:/meow_racer_experiments" \
+    environment.random_seed=77 \
+    environment.observation.lookahead.usage=true \
+    environment.observation.lookahead.lookahead_time=0.16 \
+    environment.observation.lookahead.num_states=10 \
+    environment.observation.lookahead.coords=false \
+    environment.observation.lookahead.curvature=true \
+    environment.observation.lookahead.scale_method=minmax \
+    environment.observation.forward_vector.scale_method=minmax \
+    environment.observation.lidar_sensor.num_lidar=30 \
+    environment.track.track_density=1 \
+    environment.vehicle.brake_on_pos_vel=true \
+    environment.vehicle.allow_both_feet=false \
+    environment.action.action_dim=3 \
+    environment.do_debug_logs=1000 \
+    environment.track.use_nam_only=true \
+    environment.vehicle.aps_bps_weight=1. \
+    penalty.time_penalty.usage=true \
+    penalty.off_course_penalty.usage=false \
+    penalty.terminate.off_course_condition=off_course_com \
+    penalty.wrong_direction_penalty.usage=true \
+    penalty.wrong_direction_penalty.penalty_value=10 \
+    penalty.reverse_penalty.usage=true \
+    penalty.reverse_penalty.penalty_value=10. \
+    penalty.reverse_penalty.add_vel=false \
+    penalty.reverse_penalty.use_cummulative=false \
+    penalty.tire_slip_penalty.usage=false \
+    reward.progress_reward_curve.usage=true \
+    reward.progress_reward_curve.reward_weight=10. \
+    reward.velocity_reward.usage=false 
