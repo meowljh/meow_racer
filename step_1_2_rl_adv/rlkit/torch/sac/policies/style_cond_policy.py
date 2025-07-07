@@ -59,7 +59,7 @@ class TanhGaussianPolicy_StyleCond(Mlp, TorchStochasticPolicy):
     def forward(self, obs_with_Z):
         # h = torch.cat((obs, Z_style), dim=1) #(B, obs_dim) (B, style_dim)
         # h = torch.cat(inputs, dim=1) #(B, obs_dim+style_dim)
-        assert obs_with_Z.shape[-1] == self.obs_dim + self.style_dim
+        assert obs_with_Z.shape[-1] == self.obs_dim + self.style_dim #마지막 차원이 observation dim + style vector dim이어야 함.
         h = obs_with_Z
         for i, fc in enumerate(self.fcs):
             h = self.hidden_activation(fc(h))
