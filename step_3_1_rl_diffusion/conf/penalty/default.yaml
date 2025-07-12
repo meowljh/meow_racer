@@ -1,0 +1,88 @@
+#penalty value들에는 전부 나중에 더해줄때는 음수를 바꿔주어야 함.
+#terminate될 때는 reward들 필요 없이 딱 penalty value만 반영
+#차량의 COM이 off-course일때는 penalty를 계속 주다가 차량 전부가 off-course일 때는 terminate
+
+curvature_velocity_penalty:
+  usage: !!bool false
+  penalty_weight: !!float 1.
+  norm_vel: !!bool false
+  norm_kappa: !!bool false
+  normed_kappa_clip_value: !!float 1.
+
+smooth_control_penalty:
+  usage: !!bool false
+  aps_penalty_value: !!float 1.
+  bps_penalty_value: !!float 1.
+  steer_penalty_value: !!float 1.
+  
+min_velocity_penalty:
+  usage: !!bool false
+  penalty_value: !!float 0.05
+  min_velocity: !!float 0.0
+
+
+neg_velocity_bps_penalty:
+  usage: !!bool false
+  penalty_value: !!float 1.
+
+
+curvature_vel_penalty:
+  usage: !!bool false
+  penalty_value: !!float 1.
+  target_theta: !!float 100
+  future_mode: !!str mean
+
+E_phi_penalty:
+  usage: !!bool false
+  penalty_value: !!float 1.
+
+E_c_penalty:
+  usage: !!bool false
+  penalty_value: !!float 1.
+  normalize_E_c: !!bool true
+  as_reward: !!bool false
+
+time_penalty:
+  usage: !!bool false
+  penalty_value: !!float 0.1
+
+fast_brake_change_penalty:
+  usage: !!bool false
+  penalty_value: !!float 1.
+
+fast_throttle_change_penalty:
+  usage: !!bool false
+  penalty_value: !!float 1.
+
+fast_steer_change_penalty:
+  usage: !!bool false
+  penalty_value: !!float 1.
+
+terminate:
+  penalty_value: !!float 200.
+  off_course_condition: !!str off_course_all #off_course_com
+  vel_condition: !!str instant_neg_vel
+  neg_vel_patience: !!float 3.
+
+reverse_penalty:
+  usage: !!bool false
+  penalty_value: !!float 10.
+  add_vel: !!bool false
+  max_kph: !!float 400 #200
+  use_cummulative: !!bool false
+ 
+
+off_course_penalty:
+  usage: !!bool false
+  penalty_value: !!float 1.
+  condition: !!str off_course_com #center of mass will be the condition of tracking the vehicle off-track
+  ratio_usage: !!bool false
+
+wrong_direction_penalty:
+  usage: !!bool false
+  penalty_value: !!float 10.
+
+tire_slip_penalty:
+  usage: !!bool false
+  penalty_weight: !!float 1.
+

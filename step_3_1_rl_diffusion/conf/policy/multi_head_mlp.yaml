@@ -1,0 +1,31 @@
+name: !!str TanhGaussianPolicy_MultiHead_Mlp
+
+head_2:
+  steer:
+    action_dim: !!int 1
+    init_w_min: !!float -0.001
+    init_w_max: !!float 0.001
+    std: null
+  throttle:
+    action_dim: !!int 1
+    init_w_min: !!float -0.001
+    init_w_max: !!float 0.001
+    std: null
+  
+head_3:
+  steer:
+    action_dim: !!int 1
+    init_w_min: !!float -0.001
+    init_w_max: !!float 0.001
+    std: null
+  aps:
+    action_dim: !!int 1
+    init_w_min: !!float  -0.001
+    init_w_max: !!float   0.001
+    std: null
+  bps:
+    action_dim: !!int 1
+    init_w_min: !!float -0.001
+    init_w_max: !!float 0.001
+    std: null
+    

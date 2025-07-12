@@ -1,0 +1,8 @@
+defaults:
+  - simulate: default
+  - environment: default
+  - penalty: default
+  - reward: default
+  - agent: default_sac
+  - policy: default
+  - style: default

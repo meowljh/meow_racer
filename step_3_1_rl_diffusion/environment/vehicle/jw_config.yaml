@@ -1,0 +1,38 @@
+#고정 변수들#
+mass: !!float 1840
+Iz: !!float 3837.368
+lf: !!float 1.419
+lr: !!float 1.481
+gear_ratio: !!float 10.65
+
+#후륜 S-PMF 계수#
+Br: !!float 11.128742028254646
+Cr: !!float 1.975900152498267
+Dr: !!float 9009.643015277969
+
+#전/후륜 제동 토크 비율 계수#
+Cb: !!float 0.7
+
+CLr: !!float 198686.5
+CLf: !!float 166478.6046833368
+
+#전륜 S-PMF 계수#
+Bf: !!float 11.731124202829513
+Cf: !!float 1.672883132833314
+Df: !!float 9427.441324099917
+
+#전/후륜 타이어 슬립각#
+alpha_f_max: !!float 0.1411
+alpha_r_max: !!float 0.1311
+
+#타이어 동반경#
+rw: !!float 0.369
+
+#타이어와 노면간의 마찰계수#
+mu: !!float 1.0
+gravity: !!float 9.81
+
+#전/후륜 구름저항 계수#
+rolling_coef_fx: !!float 0.006724669206530
+rolling_coef_rx: !!float 0.002439521729772
+

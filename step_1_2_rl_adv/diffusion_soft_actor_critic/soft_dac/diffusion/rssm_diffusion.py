@@ -13,7 +13,7 @@ sys.path.append(root)
 sys.path.append(f"{root}/networks")
 from networks.module import MLP
 from .scheduler import LinearBetaScheduler
-from .tools import extract
+from .tools import extract, DifferentiableGMM
 
 class ToyDiffusion(nn.Module):
     def __init__(self,
@@ -53,6 +53,15 @@ class ToyDiffusion(nn.Module):
         self.var_scheduler = LinearBetaScheduler(num_train_timesteps=num_timesteps, beta_1=beta_1, beta_T=beta_T)
 
         self.reverse_sampling_dist = reverse_sampling_dist
+
+        self.num_timesteps = num_timesteps
+
+        self.true_p0_dist = DifferentiableGMM(
+                weights=[0.8, 0.2],
+                means=[[3, 3], [-3, -3]],
+                covariances=[torch.eye(2), torch.eye(2)],
+                device = self.device
+        )
     
     def gmm_density_torch(self, x0: torch.Tensor, do_log:bool=False):
         mean1 = torch.tensor([3., 3.], device=self.device)
@@ -100,7 +109,8 @@ class ToyDiffusion(nn.Module):
 
         return gauss1 + gauss2
 
-    def compute_rssm_loss(self, batch_size:int, x_shape:tuple, do_log:bool=False):
+    def compute_rssm_loss(self, batch_size:int, x_shape:tuple, do_log:bool=False,
+                          debug:bool=False):
         #step1: randomly sample t#
         t = (
             torch.randint(0, self.var_scheduler.num_train_timesteps, size=(batch_size,))
@@ -119,18 +129,30 @@ class ToyDiffusion(nn.Module):
         target_noise = torch.randn(x_shape).to(self.device)
         x_t = x_t.to(self.device)
         #step4: compute ~{x_0}#
-        x_0_tilda = (1 / extract(self.var_scheduler.sqrt_alphas_cumprod, t, x_t).to(self.device)) * x_t - \
-                        target_noise * (extract(self.var_scheduler.sqrt_one_minus_alphas_cumprod, t, x_t).to(self.device) / extract(self.var_scheduler.sqrt_alphas_cumprod, t, x_t).to(self.device))
+        x_t_weight = 1 / extract(self.var_scheduler.sqrt_alphas_cumprod, t, x_t).to(self.device)
+        noise_weight = extract(self.var_scheduler.sqrt_one_minus_alphas_cumprod, t, x_t).to(self.device) / extract(self.var_scheduler.sqrt_alphas_cumprod, t, x_t).to(self.device)
+
+        x_0_tilda = x_t - target_noise * extract(self.var_scheduler.sqrt_one_minus_alphas_cumprod, t, x_t).to(self.device)
+        x_0_tilda /= extract(self.var_scheduler.sqrt_alphas_cumprod, t, x_t).to(self.device)
+        # x_0_tilda = x_t * x_t_weight + target_noise * noise_weight
+
+        # x_0_tilda = (1 / extract(self.var_scheduler.sqrt_alphas_cumprod, t, x_t).to(self.device)) * x_t - \
+        #                 target_noise * (extract(self.var_scheduler.sqrt_one_minus_alphas_cumprod, t, x_t).to(self.device) / extract(self.var_scheduler.sqrt_alphas_cumprod, t, x_t).to(self.device))
+        if debug:
+            return x_0_tilda
         #step5: compute RSSM loss#
         score_prediction = self.model(x=x_t, time=t)
-        with torch.no_grad():
+        # with torch.no_grad():
             # p0_loss_weight = self.gmm_density(x=x_0_tilda[:, 0], y=x_0_tilda[:, 1])
-            p0_loss_weight = self.gmm_density_torch(x0 = x_0_tilda, do_log=do_log)
-            p0_loss_weight = p0_loss_weight.unsqueeze(1)
+        # p0_loss_weight = self.gmm_density_torch(x0=x_0_tilda, do_log=do_log)
+        p0_loss_weight = self.true_p0_dist.prob(x_0_tilda)
+        p0_loss_weight = p0_loss_weight.unsqueeze(1)
+
         target_score = -target_noise / extract(self.var_scheduler.sqrt_one_minus_alphas_cumprod, t, x_t).to(self.device)
-        rssm_loss = p0_loss_weight * F.mse_loss(score_prediction, target_score, reduction='none')
-        # rssm_loss = p0_loss_weight * F.mse_loss(score_prediction, target_noise)
+        # rssm_loss = p0_loss_weight * F.mse_loss(score_prediction, target_score, reduction='none')
+        rssm_loss = p0_loss_weight * F.mse_loss(score_prediction, target_noise, reduction='none')
         rssm_loss = rssm_loss.mean()
+
 
         return rssm_loss
         
@@ -143,9 +165,11 @@ class ToyDiffusion(nn.Module):
         :param t:
         """
         score_theta = self.model(x=x_t, time=t)
+
         a = 1 / extract(self.var_scheduler.sqrt_alphas_cumprod, t, x_t).to(self.device)
         beta_t = extract(self.var_scheduler.betas, t, x_t).to(self.device)
-        c = ((1 - extract(self.var_scheduler.alphas_cumprod_prev, t, x_t).to(self.device)) / (1 - extract(self.var_scheduler.alphas_cumprod, t, x_t).to(self.device)))
+        c = ((1 - extract(self.var_scheduler.alphas_cumprod_prev, t, x_t).to(self.device)) \
+             / (1 - extract(self.var_scheduler.alphas_cumprod, t, x_t).to(self.device)))
         z_t = torch.randn(x_t.shape).to(self.device)
 
         x_t_prev = (a * (beta_t*score_theta + x_t)) + (beta_t * c * z_t)
@@ -158,19 +182,18 @@ class ToyDiffusion(nn.Module):
         """p_sample_loop
         
         """
-        if self.reverse_sampling_dist == 'gauss':
-            x_T = torch.randn(shape) * 2
-        elif self.reverse_sampling_dist == 'uniform':
-            high, low = 6, -6
-            x_T = (high - low) * torch.rand(shape) + low #Unif(-6, 6)
-        else:
-            raise NotImplementedError(f"{self.reverse_sampling_dist} is not supported")
+        # if self.reverse_sampling_dist == 'gauss':
+        #     x_T = torch.randn(shape) * 2
+        # elif self.reverse_sampling_dist == 'uniform':
+        #     high, low = 6, -6
+        #     x_T = (high - low) * torch.rand(shape) + low #Unif(-6, 6)
+        # else:
+        #     raise NotImplementedError(f"{self.reverse_sampling_dist} is not supported")
         x_0_pred = None
-        # x_T = torch.randn(shape) 
+        x_T = torch.randn(shape) 
         x_T = x_T.to(self.device)
 
-        # for t in self.var_scheduler.timesteps:
-        for t in range(self.num_timesteps+1, 0, -1): #T, T-1,.., 1
+        for t in self.var_scheduler.timesteps: #T, T-1,.., 1
             # if isinstance(t, int):
             #     t = torch.tensor([t])
             # t = t.to(self.device)

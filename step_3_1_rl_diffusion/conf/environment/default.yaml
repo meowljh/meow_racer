@@ -1,0 +1,160 @@
+random_seed: !!int 42
+
+continue_training:
+  usage: !!bool false
+  epoch_mode: !!str best
+
+
+do_debug_logs: !!int 0
+
+track:
+  use_nam_only: !!bool false
+  min_num_ckpt: !!int 4
+  max_num_ckpt: !!int 16
+  min_kappa: !!float 0.04
+  max_kappa: !!float 0.1
+  track_width: !!float 7. #전체 너비
+  track_density: !!int 1 #트랙의 좌표들 촘촘함 정도
+  track_radius: !!float 200. #트랙의 좌표들을 처음에 찍을 때의 최대 반지름 정의
+  scale_rate: !!float 1. #트랙의 크기 scaling
+  nam_ratio: !!float 0.
+
+vehicle:
+  dt: !!float 0.016 #1/60
+  world_dt: !!float 0.2
+  cfg_file_path: !!str jw_config.yaml
+  aps_bps_weight: !!float 1.
+  allow_both_feet: !!bool true
+  normalize_aps_bps: !!bool false
+  brake_on_pos_vel: !!bool false
+  schedule_brake_ratio: !!bool false
+  schedule_brake_ratio_scale: !!float 0.01
+  schedule_brake_episode: !!float 200
+  zero_force_neg_vel: !!bool false
+  always_pos_vel: !!float -1
+  allow_neg_torque: !!bool false
+  use_continuous_bps: !!bool false
+  initial_vx: !!float 0.
+  # max_initial_vx: !!float 1.
+  # schedule_initial_vx: !!bool false
+  use_aps_bps_diff: !!bool false
+
+action:
+  action_dim: !!int 2
+  steer_range:
+    - -1
+    - 1
+  torque_range:
+    - -1
+    - 1
+  throttle_range:
+    - 0
+    - 1
+  brake_range:
+    - 0
+    - 1
+
+observation:
+
+  forward_vector:
+    usage: !!bool true
+    theta_diff: !!float 5
+    num_vecs: !!int 15
+    min_val: !!float 0.
+    max_val: !!float 75.
+    rotate_vec: !!bool false
+    scale_method: !!str standard
+
+  lidar_sensor:
+    usage: !!bool true
+    lidar_angle_min: !!float -90
+    lidar_angle_max: !!float +90
+    num_lidar: !!int 20
+    max_lidar_length: !!float 20.
+    max_val: !!float 20.
+    min_val: !!float -1. #혹시 없는 경우를 위해서
+    scale_method: !!str minmax
+
+  lookahead:
+    usage: !!bool true
+    lookahead_time: !!float 6.
+    lookahead_theta: !!float 6.
+    num_states: !!int 30
+    coords: !!bool false
+    curvature: !!bool true
+    fixed: !!null
+    scale_method: !!str minmax
+ 
+
+
+  ##### curvilinear coordinate #####
+  e_phi: #트랙의 접선에 대한 yaw각 오차
+    usage: !!bool true
+    scale_method: !!str standard
+
+  e_c: #차량과 트랙의 접선 간 수직 변위
+    usage: !!bool true
+    scale_method: !!str standard
+
+  vx:
+    usage: !!bool false
+    scale_method: !!str standard
+
+  vy:
+    usage: !!bool false
+    scale_method: !!str standard
+
+  ax:
+    usage: !!bool false
+    scale_method: !!str standard
+  
+  ay:
+    usage: !!bool false
+    scale_method: !!str standard
+  
+  dx:
+    usage: !!bool false
+    scale_method: !!str standard
+  
+  dy:
+    usage: !!bool false
+    scale_method: !!str standard
+  
+  is_off_track:
+    usage: !!bool true
+    scale_method: !!str none
+
+  ##### tire slip #####
+  alpha_f: #전륜 슬립각
+    usage: !!bool false
+    scale_method: !!str standard
+  
+  alpha_r: #후륜 슬립각
+    usage: !!bool false
+    scale_method: !!str standard
+
+  sigma_f: #전륜 슬립율
+    usage: !!bool false
+    scale_method: !!str standard
+
+  sigma_r: #후륜 슬립율
+    usage: !!bool false
+    scale_method: !!str standard
+
+  
+  ##### tire force #####
+  Ffx: #전륜 횡방향 힘
+    usage: !!bool false
+    scale_method: !!str standard
+
+  Ffy: #전륜 종방향 힘
+    usage: !!bool false
+    scale_method: !!str standard
+
+  Frx: #후륜 횡방향 힘
+    usage: !!bool false
+    scale_method: !!str standard
+
+  Fry: #후륜 종방향 힘
+    usage: !!bool false
+    scale_method: !!str standard

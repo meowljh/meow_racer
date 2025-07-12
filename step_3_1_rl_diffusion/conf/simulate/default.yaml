@@ -1,0 +1,75 @@
+window_w: !!float 1000.
+window_h: !!float 1000.
+zoom_rate: !!float 1.5 #0.5 # 1. #0.5 # 5.
+scale_rate: !!float 1.
+bounds: !!float 1000.
+render_fps: !!float 60
+bg_color:
+  - 0
+  - 0
+  - 0
+road_color:
+  - 255
+  - 255
+  - 255
+car_color:
+  - 255
+  - 0
+  - 0
+lidar_color:
+  - 0
+  - 255
+  - 0
+fvec_color:
+  - 0
+  - 0
+  - 255
+
+### action render configurations
+action_cx: !!float 100
+action_cy: !!float 30
+action_font_size: !!int 15
+
+### reward render configurations
+reward_text_color:
+  - 0
+  - 0
+  - 255
+reward_bg_color:
+  - 255
+  - 255
+  - 255
+reward_cx: !!float 300
+reward_cy: !!float 30 
+reward_font_size: !!int 10
+
+### penalty render configurations
+penalty_text_color:
+  - 255
+  - 0
+  - 0
+penalty_bg_color:
+  - 255
+  - 255
+  - 255
+penalty_cx: !!float 600
+penalty_cy: !!float 30
+penalty_font_size: !!int 10
+
+### car-state render configurations
+render_car_state:
+  - car_x
+  - car_y
+  - Omega
+  - car_phi
+  - torque_action2value
+  - steer_action2value
+  - Vx
+  - Vy
+  - Theta
+  - heading_diff
+  - E_c
+  - E_phi
+car_state_cx: !!float 900
+car_state_cy: !!float 30
+car_state_font: !!int 15
