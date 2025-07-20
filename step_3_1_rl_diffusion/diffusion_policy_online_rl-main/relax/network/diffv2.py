@@ -70,7 +70,7 @@ class Diffv2Net:
         batch_action = batch_flatten_actions.reshape(obs.shape[0], -1, self.act_dim) # ?
         slice = lambda x, y: x[y]
         # action: batch_size, repeat_size, idx: batch_size
-        best_action = jax.vmap(slice, (0, 0))(batch_action, max_q_idx)
+        best_action = jax.vmap(fun=slice, in_axes=(0, 0))(batch_action, max_q_idx)
         return best_action
 
 

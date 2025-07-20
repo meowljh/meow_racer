@@ -14,10 +14,15 @@ def _get_activation(name: str):
         return nn.ReLU()
     elif name.lower() == 'sigmoid':
         return nn.Sigmoid()
+    elif name.lower() == 'identity':
+        return nn.Identity()
+    elif name.lower() == 'mish':
+        return nn.Mish()
+    elif name.lower() == 'gelu':
+        return nn.GELU()
     else:
         raise NotImplementedError(name)
-
-@dataclass
+ 
 class ValueNet(nn.Module):
     def __init__(self, 
                  input_size: int, 
@@ -43,7 +48,7 @@ class ValueNet(nn.Module):
         return out
 
 
-@dataclass
+ 
 class QNet(nn.Module):
     def __init__(self,
                  input_size: int,
@@ -62,12 +67,22 @@ class QNet(nn.Module):
                        output_activation_fn=output_activation_fn,
                        squeeze_output=True)
     
-    def forward(self, obs: torch.Tensor, act: torch.Tensor):
+    def forward(self, obs: torch.Tensor, act: torch.Tensor): 
         input = torch.concatenate((obs, act), axis=-1)
         out = self.net(input)
         return out
+ 
+class MultiStyleQNet(nn.Module):
+    def __init__(self, 
+                 input_size: int,
+                 num_styles: int,
+                 hidden_sizes: Sequence[int],
+                 activation_fn: str,
+                 output_activation_fn: str,
+                 **kwargs):
+        super().__init__()
 
-@dataclass
+ 
 class PolicyNet(nn.Module):
     def __init__(self,
                  action_dim: int,
@@ -100,15 +115,16 @@ class PolicyNet(nn.Module):
             self.initial_log_std = float(self.log_std_mode)
             self.mean_net = MLP(input_dim, hidden_sizes, output_dim, activation_fn, output_activation_fn)
         
+        self.output_dim = output_dim
         self.min_log_std = min_log_std
         self.max_log_std = max_log_std
         
     def forward(self, obs: torch.Tensor, style: torch.Tensor=None, return_log_std: bool=False)->torch.Tensor:
         input = torch.concatenate((obs, style), dim=-1) if style is not None else obs
-        
         if self.log_std_mode == 'shared':
             out = self.net(input)
-            mean, log_std = torch.split(out, 2, dim=-1)
+            # mean, log_std = torch.split(out, 2, dim=-1)
+            mean, log_std = torch.split(out, split_size_or_sections=self.output_dim//2, dim=-1)
         
         elif self.log_std_mode == 'separate':
             mean = self.mean_net(input)
@@ -127,7 +143,7 @@ class PolicyNet(nn.Module):
             return mean, torch.exp(log_std)
 
             
-@dataclass
+ 
 class DiffusionPolicyNet(nn.Module):
     def __init__(self,
                  time_dim: int,
@@ -145,7 +161,7 @@ class DiffusionPolicyNet(nn.Module):
         (B, action_dim)에 다음 action을 채울 것임.
         단순히 observation state vector만 입력으로 받는게 아님.
         """
-        self.input_dim = obs_dim + action_dim + style_dim
+        self.input_dim = obs_dim + action_dim + style_dim + time_dim
         self.diffusion_policy_net = MLP(
             input_size=self.input_dim,
             hidden_sizes=hidden_sizes,
@@ -154,9 +170,15 @@ class DiffusionPolicyNet(nn.Module):
             output_activation_fn=output_activation_fn
         )
         self.time_dim = time_dim
+        self.style_dim = style_dim
     
     def forward(self, obs: torch.Tensor, act: torch.Tensor, t: torch.Tensor, 
                 style: torch.Tensor=None)->torch.Tensor:
+        """
+        :param act: (B, act_dim)의 tensor으로, 다음 predicted action을 해당 tensor에 채워 넣어야 함.
+        """
+        if self.style_dim == 0:
+            assert style is None
         te = scaled_sinusoidal_encoding(t=t, dim=self.time_dim, batch_shape=obs.shape[:-1])
         input = torch.concatenate((obs, act, te), axis=-1) if style is None else \
                     torch.concatenate((style, obs, act, te), axis=-1)
@@ -164,7 +186,7 @@ class DiffusionPolicyNet(nn.Module):
 
         return out
 
-@dataclass
+ 
 class DACERPolicyNet(nn.Module):
     def __init__(self,
                  time_dim: int,
@@ -177,7 +199,7 @@ class DACERPolicyNet(nn.Module):
                  **kwargs):
         super(DACERPolicyNet, self).__init__()
         
-        self.input_dim = obs_dim + action_dim + style_dim
+        self.input_dim = obs_dim + action_dim + style_dim + time_dim
 
         self.dacer_policy_net = MLP(
             input_size=self.input_dim,
@@ -190,12 +212,17 @@ class DACERPolicyNet(nn.Module):
         self.time_emb_fc = nn.Sequential(
             nn.Linear(time_dim, time_dim*2),
             _get_activation(activation_fn),
-            nn.Linear(time_dim, time_dim)
+            nn.Linear(time_dim*2, time_dim)
         )
 
         self.time_dim = time_dim
 
+        self.style_dim = style_dim
+
     def forward(self, obs:torch.Tensor, act:torch.Tensor, t:torch.Tensor, style:torch.Tensor=None)->torch.Tensor:
+        if self.style_dim == 0:
+            assert style is None
+
         te = scaled_sinusoidal_encoding(t=t, dim=self.time_dim, batch_shape=obs.shape[:-1])
         te = self.time_emb_fc(te)
         input = torch.concatenate((obs, act, te), dim=-1) if style is None else \
@@ -261,7 +288,7 @@ def scaled_sinusoidal_encoding(t: torch.Tensor,
     emb *= scale
 
     if batch_shape is not None:
-        emb = emb.expand(*batch_shape, dim)
+        emb = emb.expand((*batch_shape, dim))
     
     return emb
 

@@ -595,7 +595,7 @@ class Racedemia_Env(gym.Env):
         if car_ref_theta >= total_theta * 0.99:
             self.num_lap += 1
             if self.num_lap == self.num_laps_for_truncate:
-                TRUNCATED= True
+                TRUNCATED= True #성공하면 truncated
                 print(f"Car successfully finished the track for {self.num_laps_for_truncate} LAPS... Will start new episode!!")
         
             # breakpoint()

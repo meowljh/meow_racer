@@ -120,7 +120,8 @@ class SDAC(Algorithm):
                 q = self.agent.q(q_params, obs, action)
                 q_loss = jnp.mean((q - q_backup) ** 2)
                 return q_loss, q
-
+            
+            ##value_and_grad는 단순히 미분할 함수에 대해서 gradient 값 자체만을 계산하는 것임.
             (q1_loss, q1), q1_grads = jax.value_and_grad(q_loss_fn, has_aux=True)(q1_params)
             (q2_loss, q2), q2_grads = jax.value_and_grad(q_loss_fn, has_aux=True)(q2_params)
 
